@@ -1,0 +1,32 @@
+name: CI/CD Pipeline
+on:
+  push:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  # Etapa 1: Escaneo de vulnerabilidades + tests de Python
+  # Debe otorgar los permisos que build.yml declara (Trivy: security-events)
+  build-python:
+    permissions:
+      contents: read
+      security-events: write
+    uses: ./.github/workflows/build.yml
+
+  # Etapa 2: Build y push de la imagen Docker (:dev o :latest segun la rama)
+  build-docker:
+    needs: build-python
+    permissions:
+      contents: read
+    uses: ./.github/workflows/docker_build.yml
+    secrets: inherit
+
+  # Etapa 3: Deploy en el servidor (profile dev o prod segun la rama)
+  deploy-server:
+    needs: build-docker
+    permissions:
+      contents: read
+    uses: ./.github/workflows/deploy.yml
+    secrets: inherit

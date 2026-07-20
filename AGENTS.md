@@ -125,6 +125,20 @@ docker push <usuario>/personal-project-back:latest
 - HTTPX `AsyncClient` with `ASGITransport` for endpoint tests.
 - Override dependencies (e.g. the DB session) via `app.dependency_overrides`.
 
+## CI/CD (GitHub Actions)
+
+- `orchestrator.yml` runs on push to `main`/`develop` (or manual dispatch):
+  **build** (Trivy scan + pytest) → **docker build & push** (`:dev` for
+  `develop`, `:latest` for `main`) → **deploy** on the self-hosted runner
+  (`docker compose --profile dev|prod pull && up -d`).
+- Required repo secrets: `DOCKER_HUB_TOKEN` (Docker Hub push/pull) and
+  `BACKEND_SECRET_KEY` (JWT secret injected at deploy time).
+- The deploy job **regenerates `.env`** on the server on every run (checkout
+  wipes untracked files); only `SECRET_KEY` comes from secrets, the other 3
+  values are written inline.
+- The self-hosted runner is repo-level (like the frontend's); it must be
+  registered in repo Settings → Actions → Runners.
+
 ## Dependencies
 
 Core runtime/test dependencies (install into `env/` and pin in
