@@ -39,6 +39,10 @@ Follow the layered structure defined by the `fastapi-templates` skill
 See `.agents/skills/fastapi-templates/SKILL.md` and its `references/details.md`
 for layer responsibilities and the new-feature checklist.
 
+Additionally, `app/api/home.py` holds the non-versioned Home router
+(`GET /`, JSON endpoint listing the available endpoints — this app is a
+pure backend, no HTML). It is included in `app/main.py` without a prefix.
+
 Dependency flow: `endpoints → services → repositories → models`, with `schemas`
 and `core` as cross-cutting layers.
 
@@ -51,6 +55,10 @@ and `core` as cross-cutting layers.
   (e.g. `SessionDep`) and reused everywhere.
 - Table models go in `app/models/`; request/response variants (`*Create`,
   `*Update`, `*Public`) go in `app/schemas/`.
+- The SQLite file lives in `data/database.db` (gitignored; the `data/` dir is
+  kept in the repo via `.gitkeep`). This is a deliberate choice: low-traffic
+  app on a resource-limited server, no external DB engine. In Docker, the
+  named volume `personal-back-data` is mounted at `/app/data` to persist it.
 
 ## Security (from day one)
 
@@ -91,6 +99,22 @@ fastapi dev app/main.py
 
 # Run tests
 pytest
+
+# Docker: build the image
+docker build -t personal-project-back .
+
+# Docker: run the container (SQLite file persisted in the named volume)
+docker run -d --name personal-back --env-file .env -p 8000:8000 -v personal-back-data:/app/data personal-project-back
+
+# Docker Compose: dev (port 8001, tag dev) / prod (port 8000, tag latest)
+docker compose --profile dev up -d
+docker compose --profile prod up -d
+
+# Docker Hub: tag and push (fill DOCKER_USERNAME in .env first)
+docker tag personal-project-back:latest <usuario>/personal-project-back:dev
+docker tag personal-project-back:latest <usuario>/personal-project-back:latest
+docker push <usuario>/personal-project-back:dev
+docker push <usuario>/personal-project-back:latest
 ```
 
 ## Testing
