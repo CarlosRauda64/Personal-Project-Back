@@ -1,0 +1,32 @@
+services:
+  backend-dev:
+    # Reemplaza con tu usuario y el nombre de tu repo en .env
+    image: ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${IMAGE_TAG_DEV:-dev}
+    container_name: fastapi_backend_dev
+    profiles:
+      - "dev"
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8001:8000"
+    volumes:
+      - personal-back-data-dev:/app/data
+
+  backend-prod:
+    # Reemplaza con tu usuario y el nombre de tu repo en .env
+    image: ${DOCKER_USERNAME}/${DOCKER_IMAGE}:${IMAGE_TAG_PROD:-latest}
+    container_name: fastapi_backend_prod
+    profiles:
+      - "prod"
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - personal-back-data:/app/data
+
+volumes:
+  personal-back-data:
+  personal-back-data-dev:
