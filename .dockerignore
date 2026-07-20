@@ -1,0 +1,17 @@
+env/
+.git/
+.gitignore
+.env
+.env.example
+*.db
+data/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+tests/
+.agents/
+skills-lock.json
+AGENTS.md
+pytest.ini
+Dockerfile
+.dockerignore
